@@ -1,0 +1,47 @@
+syntax = "proto3";
+package protocol;
+
+// id 1-100
+
+message Gateway{
+    int32 id =1;
+    string address =2;
+}
+
+message G2CRegisterGateway{
+    enum MsgID{
+        Zero =0;
+        ID = 1;
+    }
+    Gateway gate =1;
+} 
+message C2GRegisterGatewayResult{
+    enum MsgID{
+        Zero =0;
+        ID=2;
+    }
+    string result =1;
+}
+
+message G2CRegisterGatewayUser{
+    enum MsgID{
+        Zero =0;
+        ID =3;
+    }
+    uint64 uid =1;
+}
+message C2GRegisterGatewayUserResult{
+    enum MsgID{
+        Zero =0;
+        ID =4;
+    }
+    string result =1;
+}
+
+message G2CRemoveGatewayUser{
+    enum MsgID{
+        Zero =0;
+        ID =5;
+    }
+    uint64 uid =1;
+}
