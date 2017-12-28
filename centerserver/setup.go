@@ -23,7 +23,7 @@ type centerServer struct {
 }
 
 func newCenterServer() *centerServer {
-	fp, err := os.Open("../center.json")
+	fp, err := os.Open("../runtime/center.json")
 	base.CheckError(err, "open center.json error ")
 	buf, err := ioutil.ReadAll(fp)
 	base.CheckError(err, "read center.json error ")
@@ -34,9 +34,15 @@ func newCenterServer() *centerServer {
 	ret.server, err = network.NewTCP4Server(cfg.RPCPort)
 	base.PanicError(err, "create center server failed ")
 	ret.proc = network.NewProcessor()
+	ret.proc.AddEventCallback(network.RemoveEvent, ret.onLostConnection)
 	ret.gateway = ret.createGatewayManger()
 	go ret.server.BlockAccept(ret.proc)
 	return &ret
+}
+func (center *centerServer) onLostConnection(e *network.Event) {
+	if center.gateway.removeGateway(e.Peer) {
+		return
+	}
 }
 func (center *centerServer) exit(reasion string) {
 	center.proc.EventChan <- &network.Event{

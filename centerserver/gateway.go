@@ -47,14 +47,14 @@ func (gate *gatewayManger) onRegisterGateway(msg *network.Message) {
 	response := protocol.C2GRegisterGatewayResult{}
 	if !base.CheckError(err, "unmarshal gateway message error") {
 		response.Result = "failed ,unmarshal gateway message error"
-		msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
+		go msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
 		return
 	}
 	for _, exist := range gate.gatewayMap {
 		if exist.gate.GetId() == gateway.GetGate().GetId() {
 			base.LogWarn("the gateway(id:%d),exists", gateway.GetGate().GetId())
 			response.Result = "failed,the id of this gateway exisits"
-			msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
+			go msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
 			return
 		}
 	}
@@ -64,7 +64,7 @@ func (gate *gatewayManger) onRegisterGateway(msg *network.Message) {
 		userMap: make(map[uint64]uint64),
 	}
 	response.Result = "success"
-	msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
+	go msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayResult_ID))
 	base.LogInfo("gateway(id:%d,address:%s) is online", gateway.GetGate().GetId(), gateway.GetGate().GetAddress())
 }
 
@@ -76,7 +76,8 @@ func (gate *gatewayManger) onRegisterUser(msg *network.Message) {
 
 	if !base.CheckError(err, "unmarshal gateway user message error") {
 		response.Result = "failed ,unmarsha gatewayuser message error"
-		msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayUserResult_ID))
+		go msg.Peer.SendMessage(&response, int32(protocol.C2GRegisterGatewayUserResult_ID))
+		return
 	}
 	if g, ok := gate.userGatewayMap[user.GetUid()]; ok {
 		delete(gate.userGatewayMap, user.GetUid())
@@ -91,11 +92,24 @@ func (gate *gatewayManger) onRegisterUser(msg *network.Message) {
 func (gate *gatewayManger) onRemoveUser(msg *network.Message) {
 	user := protocol.G2CRemoveGatewayUser{}
 	err := proto.Unmarshal(msg.Body, &user)
-	if !base.CheckError(err, "unmarshal remove user message error") {
+	if base.CheckError(err, "unmarshal remove user message error") {
 		if g, ok := gate.userGatewayMap[user.GetUid()]; ok {
 			g.removeUser(gate, user.GetUid())
 		} else {
 			base.LogWarn("can't find user gateway ")
 		}
 	}
+}
+
+// check peer is a gateway or not and remove it
+func (gate *gatewayManger) removeGateway(peer *network.ClientPeer) bool {
+	if g, ok := gate.gatewayMap[peer]; ok {
+		for _, v := range g.userMap {
+			delete(gate.userGatewayMap, v)
+		}
+		base.LogDebug("lost gateway(%d) connection", g.gate.GetId())
+		delete(gate.gatewayMap, peer)
+		return true
+	}
+	return false
 }

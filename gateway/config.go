@@ -17,7 +17,7 @@ type config struct {
 var cfg config
 
 func init() {
-	fp, err := os.Open("../gateway.json")
+	fp, err := os.Open("../runtime/gateway.json")
 	if err == nil {
 		buf, err := ioutil.ReadAll(fp)
 		base.CheckError(err, "read buf error:")
