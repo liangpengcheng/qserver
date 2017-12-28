@@ -1,0 +1,67 @@
+syntax = "proto3";
+package protocol;
+
+// 101-200
+// 注册，登录 到loginserver
+message C2LRegister{
+    enum MsgID{
+        Zero = 0;
+        ID = 101;
+    }
+    string username = 1;
+    string password =2;
+}
+message L2CRegisterResult{
+    enum MsgID{
+        Zero = 0;
+        ID = 102;
+    }
+    string result = 1;//success or failed with message
+    string token = 2;
+    string gatewayAddr = 3;
+}
+
+message C2LLogin{
+    enum MsgID{
+        Zero = 0;
+        ID = 103;
+    }
+    string username = 1;
+    string password = 2;
+}
+// 第三方登录
+message C2LLoginThirdSDK{
+    enum MsgID{
+        Zero = 0;
+        ID =104;
+    }
+    int32 platform=1;
+    string sdkToken=2;
+    string sdkExtern=3;
+}
+message L2CLoginResult{
+    enum MsgID{
+        Zero = 0;
+        ID = 105;
+    }
+    string result = 1;//success or failed with message
+    string token = 2;
+    string gatewayAddr =3;
+}
+
+// 根据token登录到gateway
+message C2GTokenLogin{
+    enum MsgID{
+        Zero = 0;
+        ID = 106;
+    }
+    string token = 1;
+}
+message G2CTokenLoginResult{
+    enum MsgID{
+        Zero = 0;
+        ID = 107;
+    }
+    string result =1;
+    uint64 uid =2;
+}
