@@ -6,6 +6,7 @@ Package protocol is a generated protocol buffer package.
 
 It is generated from these files:
 	gateway.proto
+	login.proto
 
 It has these top-level messages:
 	Gateway
@@ -14,6 +15,13 @@ It has these top-level messages:
 	G2CRegisterGatewayUser
 	C2GRegisterGatewayUserResult
 	G2CRemoveGatewayUser
+	C2LRegister
+	L2CRegisterResult
+	C2LLogin
+	C2LLoginThirdSDK
+	L2CLoginResult
+	C2GTokenLogin
+	G2CTokenLoginResult
 */
 package protocol
 
