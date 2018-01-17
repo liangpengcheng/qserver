@@ -19,5 +19,11 @@ func (g *gateway) onRegisterGatewayResponse(msg *network.Message) {
 	}
 }
 func (g *gateway) onRegisterGatewayUserResponse(msg *network.Message) {
-
+	regUserResult := protocol.C2GRegisterGatewayUserResult{}
+	err := proto.Unmarshal(msg.Body, &regUserResult)
+	if base.CheckError(err, "unmarshal register gatewayuser result") {
+		if regUserResult.GetResult() != "Success" {
+			base.LogWarn("register user failed :%s", regUserResult.GetResult())
+		}
+	}
 }

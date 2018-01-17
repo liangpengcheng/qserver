@@ -3,6 +3,7 @@ package main
 import (
 	"net"
 	"strings"
+	"sync"
 
 	"github.com/liangpengcheng/qcontinuum/base"
 	"github.com/liangpengcheng/qcontinuum/network"
@@ -13,12 +14,27 @@ type gateway struct {
 	centerPeer *network.ClientPeer
 	proc       *network.Processor
 	server     *network.Server
+	usermap    sync.Map
 }
 
+func (g *gateway) getUser(uid uint64) *client {
+	if v, ok := g.usermap.Load(uid); ok {
+		return v.(*client)
+	}
+	return nil
+}
+func (g *gateway) addUser(uid uint64, c *client) {
+	if v, ok := g.usermap.Load(uid); ok {
+		c := v.(*client)
+		c.connection.Connection.Close()
+	}
+	g.usermap.Store(uid, c)
+}
 func newGateway() *gateway {
 	connection, err := net.Dial("tcp", cfg.Center)
 	base.PanicError(err, "dial center server")
 	processor := network.NewProcessor()
+	processor.ImmediateMode = true
 	g := gateway{
 		centerPeer: &network.ClientPeer{
 			Connection: connection,
@@ -34,6 +50,8 @@ func newGateway() *gateway {
 			Address: cfg.Address,
 		},
 	}
+	processor.AddCallback(int32(protocol.C2GTokenLogin_ID), g.onLogin)
+	processor.UnHandledHandler = g.onUnhandledMsg
 	go g.centerPeer.ConnectionHandler()
 	go g.centerPeer.SendMessage(&regGateway, int32(protocol.G2CRegisterGateway_ID))
 	return &g

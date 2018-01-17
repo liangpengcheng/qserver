@@ -1,0 +1,49 @@
+syntax = "proto3";
+package protocol;
+//201 - 300
+
+
+message Service
+{
+    repeated int32 handler = 1;
+    int32 version = 2;
+    string name = 3;
+    string address = 4;//rpc地址
+}
+// service 2 center server 注册
+message S2CServiceRegister
+{
+    enum MsgID{
+        Zero =0;
+        ID = 201;
+    }
+    Service serv =1;
+}
+
+// center 2 service 注册结果
+message C2SServiceRegisterResult
+{
+    enum MsgID{
+        Zero =0;
+        ID =202;
+    }
+    string Result =1;
+}
+// center 2 gateway 注册 service,广播
+message C2GServiceRegister
+{
+    enum MsgID{
+        Zero = 0;
+        ID = 203;
+    }
+    Service serv =1;
+}
+// center2 gateway 删除service ,广播
+message C2GServiceRemove
+{
+    enum MsgID{
+        Zero = 0;
+        ID = 204;
+    }
+    Service serv =1;
+}

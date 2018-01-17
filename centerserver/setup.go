@@ -20,6 +20,7 @@ type centerServer struct {
 	server  *network.Server
 	proc    *network.Processor
 	gateway *gatewayManger
+	servMgr *serviceManager
 }
 
 func newCenterServer() *centerServer {
@@ -36,11 +37,15 @@ func newCenterServer() *centerServer {
 	ret.proc = network.NewProcessor()
 	ret.proc.AddEventCallback(network.RemoveEvent, ret.onLostConnection)
 	ret.gateway = ret.createGatewayManger()
+	ret.servMgr = newServiceManager()
 	go ret.server.BlockAccept(ret.proc)
 	return &ret
 }
 func (center *centerServer) onLostConnection(e *network.Event) {
 	if center.gateway.removeGateway(e.Peer) {
+		return
+	}
+	if center.servMgr.checkLostConnection(e.Peer) {
 		return
 	}
 }
