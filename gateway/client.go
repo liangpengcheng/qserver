@@ -21,7 +21,7 @@ func (g *gateway) onLogin(msg *network.Message) {
 		Result: "Success",
 		Uid:    uid,
 	}
-	msg.Peer.SendMessage(&logres, int32(protocol.G2CTokenLoginResult_ID))
+	go msg.Peer.SendMessage(&logres, int32(protocol.G2CTokenLoginResult_ID))
 }
 
 func (g *gateway) onUnhandledMsg(msg *network.Message) {

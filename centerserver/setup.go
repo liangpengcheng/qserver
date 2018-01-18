@@ -37,7 +37,7 @@ func newCenterServer() *centerServer {
 	ret.proc = network.NewProcessor()
 	ret.proc.AddEventCallback(network.RemoveEvent, ret.onLostConnection)
 	ret.gateway = ret.createGatewayManger()
-	ret.servMgr = newServiceManager()
+	ret.servMgr = newServiceManager(&ret)
 	go ret.server.BlockAccept(ret.proc)
 	return &ret
 }

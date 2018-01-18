@@ -14,21 +14,51 @@ type gateway struct {
 	centerPeer *network.ClientPeer
 	proc       *network.Processor
 	server     *network.Server
-	usermap    sync.Map
+	userMap    sync.Map
+	serviceMap sync.Map
 }
 
 func (g *gateway) getUser(uid uint64) *client {
-	if v, ok := g.usermap.Load(uid); ok {
+	if v, ok := g.userMap.Load(uid); ok {
 		return v.(*client)
 	}
 	return nil
 }
 func (g *gateway) addUser(uid uint64, c *client) {
-	if v, ok := g.usermap.Load(uid); ok {
+	if v, ok := g.userMap.Load(uid); ok {
 		c := v.(*client)
 		c.connection.Connection.Close()
 	}
-	g.usermap.Store(uid, c)
+	g.userMap.Store(uid, c)
+}
+func (g *gateway) addService(serv *protocol.Service) {
+	// 连接rpc
+	thisservice := service{
+		serv: serv,
+	}
+	for _, v := range serv.GetHandler() {
+		if sl, ok := g.serviceMap.Load(v); ok {
+			servL := sl.([]*service)
+			servL = append(servL, &thisservice)
+			g.serviceMap.Store(v, servL)
+		} else {
+			g.serviceMap.Store(v, []*service{&thisservice})
+		}
+	}
+}
+func (g *gateway) removeService(serv *protocol.Service) {
+	for _, v := range serv.GetHandler() {
+		if sl, ok := g.serviceMap.Load(v); ok {
+			servL := sl.([]*service)
+			for n, v := range servL {
+				if v.serv.Address == serv.Address {
+					servL = append(servL[:n], servL[n+1:]...)
+					g.serviceMap.Store(v, servL)
+					break
+				}
+			}
+		}
+	}
 }
 func newGateway() *gateway {
 	connection, err := net.Dial("tcp", cfg.Center)

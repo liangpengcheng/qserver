@@ -113,3 +113,9 @@ func (gate *gatewayManger) removeGateway(peer *network.ClientPeer) bool {
 	}
 	return false
 }
+
+func (gate *gatewayManger) broadcastGateway(id int32, msg proto.Message) {
+	for k := range gate.gatewayMap {
+		go k.SendMessage(msg, id)
+	}
+}

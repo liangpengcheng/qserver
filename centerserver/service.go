@@ -16,10 +16,13 @@ type service struct {
 }
 type serviceManager struct {
 	services sync.Map
+	center   *centerServer
 }
 
-func newServiceManager() *serviceManager {
-	return &serviceManager{}
+func newServiceManager(center *centerServer) *serviceManager {
+	return &serviceManager{
+		center: center,
+	}
 }
 func (sm *serviceManager) regCallback(proc *network.Processor) {
 	proc.AddCallback(int32(protocol.S2CServiceRegister_ID), sm.onServiceReg)
@@ -30,8 +33,14 @@ func (sm *serviceManager) addService(serv *service) {
 	regresp := protocol.C2SServiceRegisterResult{
 		Result: "Success",
 	}
+
 	serv.connection.SendMessage(&regresp, int32(protocol.C2SServiceRegisterResult_ID))
 	sm.services.Store(serv.connection, serv)
+
+	togate := protocol.C2GServiceRegister{
+		Serv: serv.serv,
+	}
+	sm.center.gateway.broadcastGateway(int32(protocol.C2GServiceRegister_ID), &togate)
 }
 
 // 先检查，在移除
