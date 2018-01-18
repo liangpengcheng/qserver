@@ -47,3 +47,17 @@ message C2GServiceRemove
     }
     Service serv =1;
 }
+
+message RPCRequest
+{
+    uint64 userid =1;
+    int32  messageid =2;
+    bytes  body =3;
+}
+message RPCResponse
+{
+    bytes response=1;
+}
+service GatewayCallService{
+    rpc Request(RPCRequest) returns(RPCResponse){}
+}

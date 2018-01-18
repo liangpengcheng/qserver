@@ -8,6 +8,7 @@ import (
 	"github.com/liangpengcheng/qcontinuum/base"
 	"github.com/liangpengcheng/qcontinuum/network"
 	"github.com/liangpengcheng/qserver/protocol"
+	"google.golang.org/grpc"
 )
 
 type gateway struct {
@@ -32,9 +33,20 @@ func (g *gateway) addUser(uid uint64, c *client) {
 	g.userMap.Store(uid, c)
 }
 func (g *gateway) addService(serv *protocol.Service) {
+	base.LogDebug("dialing rpc :%s", serv.Address)
+	opts := grpc.WithInsecure()
 	// 连接rpc
+	conn, err := grpc.Dial(serv.Address, opts)
+
+	// 连接失败
+	if !base.CheckError(err, "dial rpc server ") {
+		return
+	}
+	rpc := protocol.NewGatewayCallServiceClient(conn)
 	thisservice := service{
-		serv: serv,
+		serv:    serv,
+		rpc:     rpc,
+		rpcConn: conn,
 	}
 	for _, v := range serv.GetHandler() {
 		if sl, ok := g.serviceMap.Load(v); ok {
@@ -52,6 +64,7 @@ func (g *gateway) removeService(serv *protocol.Service) {
 			servL := sl.([]*service)
 			for n, v := range servL {
 				if v.serv.Address == serv.Address {
+					v.onDestroy()
 					servL = append(servL[:n], servL[n+1:]...)
 					g.serviceMap.Store(v, servL)
 					break

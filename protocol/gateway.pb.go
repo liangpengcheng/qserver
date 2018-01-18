@@ -28,6 +28,8 @@ It has these top-level messages:
 	C2SServiceRegisterResult
 	C2GServiceRegister
 	C2GServiceRemove
+	RPCRequest
+	RPCResponse
 */
 package protocol
 
