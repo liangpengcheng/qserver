@@ -1,5 +1,5 @@
 syntax = "proto3";
-package main;
+package chat;
 // start 90001
 message C2GIMMessage{
     enum MsgID{
