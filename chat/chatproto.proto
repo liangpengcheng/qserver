@@ -1,0 +1,30 @@
+syntax = "proto3";
+package main;
+// start 90001
+message C2GIMMessage{
+    enum MsgID{
+        Zero =0;
+        ID= 90001;
+    }
+    uint64 touser = 1;
+    string content =2;
+    int32 channel =3;
+}
+
+
+message G2CIMMessage{
+    enum MsgID{
+        Zero = 0;
+        ID = 90002;
+    }
+    uint64 from =1;
+    string content =2;
+    int32 channel =3;
+}
+message G2CIMChatResult{
+    enum MsgID{
+        Zero =0;
+        ID =90003;
+    }
+    string result =1;
+}

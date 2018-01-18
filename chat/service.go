@@ -1,17 +1,25 @@
 package main
 
-import "github.com/liangpengcheng/qserver/service"
+import (
+	"github.com/golang/protobuf/proto"
+	"github.com/liangpengcheng/qcontinuum/base"
+	"github.com/liangpengcheng/qserver/service"
+)
 
 type chatService struct {
 	handler *service.RPCHandler
+	manager *service.Manager
 }
 
 func newChatService() *service.Manager {
 	handler := service.NewHandler()
+	handler.ImmediateMode = true
 	serv := &chatService{
 		handler: handler,
 	}
+	handler.AddCallback(int32(C2GIMMessage_ID), serv.onChat)
 	manager := service.NewManager(serv, "127.0.0.1:8888", "127.0.0.1:7777")
+	serv.manager = manager
 	return manager
 }
 func (cs *chatService) GetName() string {
@@ -23,4 +31,21 @@ func (cs *chatService) GetVersion() int32 {
 }
 func (cs *chatService) GetProcessor() *service.RPCHandler {
 	return cs.handler
+}
+
+func (cs *chatService) onChat(msg *service.RPCMessage) (proto.Message, int32) {
+	chat := C2GIMMessage{}
+	err := proto.Unmarshal(msg.MSG, &chat)
+	chatresult := G2CIMChatResult{}
+	if base.CheckError(err, "unmarshal chat") {
+		chatto := G2CIMMessage{}
+		chatto.From = msg.UID
+		chatto.Content = chat.GetContent()
+		chatto.Channel = chat.GetChannel()
+		cs.manager.SendMessageTo(chat.GetTouser(), &chatto, int32(G2CIMMessage_ID))
+		chatresult.Result = "Success"
+	} else {
+		chatresult.Result = "Failed"
+	}
+	return &chatresult, int32(G2CIMChatResult_ID)
 }

@@ -3,6 +3,8 @@ package service
 import (
 	"net"
 
+	"github.com/golang/protobuf/proto"
+
 	"google.golang.org/grpc"
 
 	"github.com/liangpengcheng/qcontinuum/base"
@@ -17,6 +19,11 @@ type Manager struct {
 	Center     *network.ClientPeer
 	Address    string
 	RPC        *grpc.Server
+}
+
+// SendMessageTo 发送消息，可以跨服发送
+func (m *Manager) SendMessageTo(to uint64, msg proto.Message, msgid int32) {
+
 }
 
 // GetMessageID 获得这个mamager的所有可处理的消息
