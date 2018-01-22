@@ -14,8 +14,12 @@ type client struct {
 	uid        uint64
 }
 
+var ucount = 0
+
 func (g *gateway) onLogin(msg *network.Message) {
-	uid := uint64(0)
+
+	uid := uint64(ucount)
+	ucount++
 	c := &client{
 		connection: msg.Peer,
 		uid:        uid,
@@ -31,7 +35,7 @@ func (g *gateway) onLogin(msg *network.Message) {
 // rpc调用service，并且将结果返回给客户端
 func (g *gateway) onUnhandledMsg(msg *network.Message) {
 	base.LogDebug("incomming unhandled messsage :%d", msg.Head.ID)
-	if u, ok := g.userMap.Load(msg.Peer); ok {
+	if u, ok := g.connectionMap.Load(msg.Peer); ok {
 		if s, ok := g.serviceMap.Load(msg.Head.ID); ok {
 			user := u.(*client)
 			sl := s.([]*service)
@@ -47,6 +51,11 @@ func (g *gateway) onUnhandledMsg(msg *network.Message) {
 					msg.Peer.SendMessageBuffer(resp.GetResponse())
 				}
 			}
+		}
+	} else {
+		base.LogInfo("can't find user kick connection")
+		if msg.Peer.Connection != nil {
+			msg.Peer.Connection.Close()
 		}
 	}
 }

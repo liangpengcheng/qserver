@@ -57,7 +57,7 @@ func NewManager(s Service, centerAddress string, rpcAddress string) *Manager {
 	}
 	base.LogInfo("RPC Service listened(%s)", rpcAddress)
 	grpcServer := grpc.NewServer()
-	protocol.RegisterGatewayCallServiceServer(grpcServer, &rpcHandler{})
+	protocol.RegisterGatewayCallServiceServer(grpcServer, &rpcHandler{Serv: s})
 	go grpcServer.Serve(lis)
 	m.RPC = grpcServer
 	centerproc.AddCallback(int32(protocol.C2SServiceRegisterResult_ID), m.onServiceRegistered)

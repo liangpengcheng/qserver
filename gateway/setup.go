@@ -12,11 +12,12 @@ import (
 )
 
 type gateway struct {
-	centerPeer *network.ClientPeer
-	proc       *network.Processor
-	server     *network.Server
-	userMap    sync.Map
-	serviceMap sync.Map
+	centerPeer    *network.ClientPeer
+	proc          *network.Processor
+	server        *network.Server
+	userMap       sync.Map
+	connectionMap sync.Map
+	serviceMap    sync.Map
 }
 
 func (g *gateway) getUser(uid uint64) *client {
@@ -25,12 +26,21 @@ func (g *gateway) getUser(uid uint64) *client {
 	}
 	return nil
 }
+func (g *gateway) removeUser(uid uint64) {
+	if v, ok := g.userMap.Load(uid); ok {
+		c := v.(*client)
+		g.userMap.Delete(uid)
+		g.connectionMap.Delete(c.connection)
+	}
+}
 func (g *gateway) addUser(uid uint64, c *client) {
 	if v, ok := g.userMap.Load(uid); ok {
 		c := v.(*client)
 		c.connection.Connection.Close()
 	}
 	g.userMap.Store(uid, c)
+	g.connectionMap.Store(c.connection, c)
+	base.LogDebug("user(%d) added", uid)
 }
 func (g *gateway) addService(serv *protocol.Service) {
 	base.LogDebug("dialing rpc :%s", serv.Address)
@@ -118,4 +128,13 @@ func (g *gateway) exit(reasion string) {
 		ID:    network.ExitEvent,
 		Param: reasion,
 	}
+}
+
+func (g *gateway) onLostConnection(e *network.Event) {
+	if v, ok := g.connectionMap.Load(e.Peer); ok {
+		c := v.(*client)
+		g.removeUser(c.uid)
+		return
+	}
+
 }

@@ -5,14 +5,27 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "chat",
+            "name": "chat-server",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "remotePath": "",
+            "port": 5432,
+            "host": "127.0.0.1",
+            "program": "${workspaceRoot}/chat/server",
+            "env": {},
+            "args": [],
+            "showLog": true
+        },
+        {
+            "name": "chat-client",
             "type": "go",
             "request": "launch",
             "mode": "debug",
             "remotePath": "",
             "port": 1234,
             "host": "127.0.0.1",
-            "program": "${workspaceRoot}/chat",
+            "program": "${workspaceRoot}/chat/client",
             "env": {},
             "args": [],
             "showLog": true
