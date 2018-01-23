@@ -37,6 +37,7 @@ func (center *centerServer) createGatewayManger() *gatewayManger {
 	center.proc.AddCallback(int32(protocol.G2CRegisterGateway_ID), gateway.onRegisterGateway)
 	center.proc.AddCallback(int32(protocol.G2CRegisterGatewayUser_ID), gateway.onRegisterUser)
 	center.proc.AddCallback(int32(protocol.G2CRemoveGatewayUser_ID), gateway.onRemoveUser)
+	center.proc.AddCallback(int32(protocol.X2XSendMessage2User_ID), gateway.onSend2User)
 	return &gateway
 }
 

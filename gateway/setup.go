@@ -31,6 +31,7 @@ func (g *gateway) removeUser(uid uint64) {
 		c := v.(*client)
 		g.userMap.Delete(uid)
 		g.connectionMap.Delete(c.connection)
+		base.LogDebug("center user(%d) deleted", uid)
 	}
 }
 func (g *gateway) addUser(uid uint64, c *client) {
@@ -40,7 +41,7 @@ func (g *gateway) addUser(uid uint64, c *client) {
 	}
 	g.userMap.Store(uid, c)
 	g.connectionMap.Store(c.connection, c)
-	base.LogDebug("user(%d) added", uid)
+	base.LogDebug("center user(%d) added", uid)
 }
 func (g *gateway) addService(serv *protocol.Service) {
 	base.LogDebug("dialing rpc :%s", serv.Address)

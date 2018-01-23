@@ -47,6 +47,15 @@ message C2GServiceRemove
     }
     Service serv =1;
 }
+message X2XSendMessage2User
+{
+    enum MsgID{
+        Zero =0;
+        ID= 205;
+    }
+    uint64 sendto =1;
+    bytes content =2;
+}
 
 message RPCRequest
 {

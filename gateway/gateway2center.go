@@ -12,6 +12,7 @@ func (g *gateway) regMsgCallback() {
 	g.proc.AddCallback(int32(protocol.C2GRegisterGatewayUserResult_ID), g.onRegisterGatewayUserResponse)
 	g.proc.AddCallback(int32(protocol.C2GServiceRegister_ID), g.onRegisterService)
 	g.proc.AddCallback(int32(protocol.C2GServiceRemove_ID), g.onRemoveService)
+	g.proc.AddCallback(int32(protocol.X2XSendMessage2User_ID), g.onSend2User)
 }
 func (g *gateway) onRegisterGatewayResponse(msg *network.Message) {
 	regResult := protocol.C2GRegisterGatewayResult{}
@@ -43,5 +44,16 @@ func (g *gateway) onRemoveService(msg *network.Message) {
 	if base.CheckError(err, "unmarshal remove service ") {
 		// 注销消息处理 ，断开连接
 		go g.removeService(remServ.GetServ())
+	}
+}
+
+func (g *gateway) onSend2User(msg *network.Message) {
+	retar := protocol.X2XSendMessage2User{}
+	err := proto.Unmarshal(msg.Body, &retar)
+	if base.CheckError(err, "(gateway) unmarsha x2x send 2 user") {
+		if u, ok := g.userMap.Load(retar.Sendto); ok {
+			c := u.(*client)
+			c.connection.SendMessageBuffer(retar.Content)
+		}
 	}
 }

@@ -85,3 +85,18 @@ func (sm *serviceManager) onServiceReg(msg *network.Message) {
 		sm.addService(&serv)
 	}
 }
+
+func (gm *gatewayManger) onSend2User(msg *network.Message) {
+	retar := protocol.X2XSendMessage2User{}
+	err := proto.Unmarshal(msg.Body, &retar)
+	if base.CheckError(err, "unmarsha x2x send 2 user") {
+		if u, ok := gm.userGatewayMap[retar.Sendto]; ok {
+			if peer, ok2 := gm.gatewayMap[u.peer]; ok2 {
+				// !fixit 重建了buffer，这个地方可以优化
+				peer.peer.SendMessage(&retar, int32(protocol.X2XSendMessage2User_ID))
+			}
+		} else {
+			base.LogWarn("can't find users(%d) gateway", retar.Sendto)
+		}
+	}
+}

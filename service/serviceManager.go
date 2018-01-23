@@ -23,7 +23,16 @@ type Manager struct {
 
 // SendMessageTo 发送消息，可以跨服发送
 func (m *Manager) SendMessageTo(to uint64, msg proto.Message, msgid int32) {
+	buf, err := network.GetMessageBuffer(msg, msgid)
+	if base.CheckError(err, "marshal send2user message") {
+		msgmerge := protocol.X2XSendMessage2User{
+			Sendto:  to,
+			Content: buf,
+		}
+		m.Center.SendMessage(&msgmerge, int32(protocol.X2XSendMessage2User_ID))
+		base.LogDebug("send message 2 gateway user")
 
+	}
 }
 
 // GetMessageID 获得这个mamager的所有可处理的消息

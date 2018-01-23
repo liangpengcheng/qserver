@@ -28,6 +28,7 @@ It has these top-level messages:
 	C2SServiceRegisterResult
 	C2GServiceRegister
 	C2GServiceRemove
+	X2XSendMessage2User
 	RPCRequest
 	RPCResponse
 */
