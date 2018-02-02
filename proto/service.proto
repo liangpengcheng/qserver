@@ -66,6 +66,7 @@ message RPCRequest
 message RPCResponse
 {
     bytes response=1;
+    bytes broadcastThisGateway=2;//当前发起rpc调用的网关广播消息
 }
 service GatewayCallService{
     rpc Request(RPCRequest) returns(RPCResponse){}

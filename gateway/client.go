@@ -50,6 +50,10 @@ func (g *gateway) onUnhandledMsg(msg *network.Message) {
 				if resp != nil && resp.GetResponse() != nil {
 					msg.Peer.SendMessageBuffer(resp.GetResponse())
 				}
+				if resp != nil && resp.GetBroadcastThisGateway() != nil {
+					//广播
+					g.broadcast(resp.GetBroadcastThisGateway())
+				}
 			}
 		}
 	} else {
@@ -58,4 +62,13 @@ func (g *gateway) onUnhandledMsg(msg *network.Message) {
 			msg.Peer.Connection.Close()
 		}
 	}
+}
+
+func (g *gateway) broadcast(buf []byte) {
+	g.userMap.Range(
+		func(key, value interface{}) bool {
+			c := value.(*client)
+			c.connection.SendMessageBuffer(buf)
+			return true
+		})
 }

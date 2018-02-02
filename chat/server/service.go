@@ -43,7 +43,11 @@ func (cs *chatService) onChat(msg *service.RPCMessage) (proto.Message, int32) {
 		chatto.From = msg.UID
 		chatto.Content = chatmsg.GetContent()
 		chatto.Channel = chatmsg.GetChannel()
-		cs.manager.SendMessageTo(chatmsg.GetTouser(), &chatto, int32(chat.G2CIMMessage_ID))
+		if chatto.Channel&uint32(chat.ChatChannel_USERCHANNEL) > 0 {
+			cs.manager.SendMessageTo(chatmsg.GetTouser(), &chatto, int32(chat.G2CIMMessage_ID))
+		} else if chatto.Channel&uint32(chat.ChatChannel_WORLDCHANNEL) > 0 {
+
+		}
 		chatresult.Result = "Success"
 	} else {
 		chatresult.Result = "Failed"

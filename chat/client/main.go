@@ -28,6 +28,7 @@ func initClient() *network.ClientPeer {
 	logintoken := protocol.C2GTokenLogin{}
 	cli.SendMessage(&logintoken, int32(protocol.C2GTokenLogin_ID))
 	go proc.StartProcess()
+	go cli.ConnectionHandler()
 	return cli
 }
 
