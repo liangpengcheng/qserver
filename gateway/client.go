@@ -48,7 +48,7 @@ func (g *gateway) onUnhandledMsg(msg *network.Message) {
 			resp, err := sl[idx].rpc.Request(context.Background(), &req)
 			if base.CheckError(err, "rpc call response :") {
 				if resp != nil && resp.GetResponse() != nil {
-					msg.Peer.SendMessageBuffer(resp.GetResponse())
+					go msg.Peer.SendMessageBuffer(resp.GetResponse())
 				}
 				if resp != nil && resp.GetBroadcastThisGateway() != nil {
 					//广播
@@ -68,7 +68,7 @@ func (g *gateway) broadcast(buf []byte) {
 	g.userMap.Range(
 		func(key, value interface{}) bool {
 			c := value.(*client)
-			c.connection.SendMessageBuffer(buf)
+			go c.connection.SendMessageBuffer(buf)
 			return true
 		})
 }

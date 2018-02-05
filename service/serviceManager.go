@@ -29,7 +29,7 @@ func (m *Manager) SendMessageTo(to uint64, msg proto.Message, msgid int32) {
 			Sendto:  to,
 			Content: buf,
 		}
-		m.Center.SendMessage(&msgmerge, int32(protocol.X2XSendMessage2User_ID))
+		go m.Center.SendMessage(&msgmerge, int32(protocol.X2XSendMessage2User_ID))
 		base.LogDebug("send message 2 gateway user")
 
 	}

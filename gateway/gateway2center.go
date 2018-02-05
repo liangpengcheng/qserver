@@ -53,7 +53,7 @@ func (g *gateway) onSend2User(msg *network.Message) {
 	if base.CheckError(err, "(gateway) unmarsha x2x send 2 user") {
 		if u, ok := g.userMap.Load(retar.Sendto); ok {
 			c := u.(*client)
-			c.connection.SendMessageBuffer(retar.Content)
+			go c.connection.SendMessageBuffer(retar.Content)
 		}
 	}
 }
