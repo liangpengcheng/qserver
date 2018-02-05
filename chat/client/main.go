@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"net"
+	"os"
 
 	"github.com/liangpengcheng/qserver/protocol"
 
@@ -46,7 +48,7 @@ func onSendMsgResult(msg *network.Message) {
 func sendMessage(c *network.ClientPeer, text string) {
 	chatmsg := chat.C2GIMMessage{
 		Content: text,
-		Channel: 1,
+		Channel: uint32(chat.ChatChannel_WORLDCHANNEL),
 		Touser:  0,
 	}
 	c.SendMessage(&chatmsg, int32(chat.C2GIMMessage_ID))
@@ -54,7 +56,16 @@ func sendMessage(c *network.ClientPeer, text string) {
 
 func main() {
 	cli := initClient()
-	sendMessage(cli, "lalala")
+	bio := bufio.NewReader(os.Stdin)
+	for {
+		line, _, err := bio.ReadLine()
+		if err == nil {
+			sendMessage(cli, string(line))
+			base.LogInfo("sending :%s", line)
+		} else {
+			break
+		}
+	}
 	base.LogInfo("%v", *cli)
 	c := make(chan struct{}, 1)
 	<-c

@@ -34,10 +34,12 @@ func (cs *chatService) GetProcessor() *service.RPCHandler {
 	return cs.handler
 }
 
-func (cs *chatService) onChat(msg *service.RPCMessage) (proto.Message, int32) {
+func (cs *chatService) onChat(msg *service.RPCMessage) (proto.Message, int32, proto.Message, int32) {
 	chatmsg := chat.C2GIMMessage{}
 	err := proto.Unmarshal(msg.MSG, &chatmsg)
 	chatresult := chat.G2CIMChatResult{}
+	var broadcastMsg proto.Message
+	var broadMsgid int32
 	if base.CheckError(err, "unmarshal chat") {
 		chatto := chat.G2CIMMessage{}
 		chatto.From = msg.UID
@@ -45,12 +47,15 @@ func (cs *chatService) onChat(msg *service.RPCMessage) (proto.Message, int32) {
 		chatto.Channel = chatmsg.GetChannel()
 		if chatto.Channel&uint32(chat.ChatChannel_USERCHANNEL) > 0 {
 			cs.manager.SendMessageTo(chatmsg.GetTouser(), &chatto, int32(chat.G2CIMMessage_ID))
+			base.LogDebug("sending message")
 		} else if chatto.Channel&uint32(chat.ChatChannel_WORLDCHANNEL) > 0 {
-
+			broadcastMsg = &chatto
+			broadMsgid = int32(chat.G2CIMMessage_ID)
+			base.LogDebug("broadcasting message")
 		}
 		chatresult.Result = "Success"
 	} else {
 		chatresult.Result = "Failed"
 	}
-	return &chatresult, int32(chat.G2CIMChatResult_ID)
+	return &chatresult, int32(chat.G2CIMChatResult_ID), broadcastMsg, broadMsgid
 }

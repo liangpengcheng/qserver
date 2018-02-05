@@ -17,7 +17,7 @@ type RPCMessage struct {
 }
 
 // MsgCallback 消息处理函数
-type MsgCallback func(msg *RPCMessage) (proto.Message, int32)
+type MsgCallback func(msg *RPCMessage) (proto.Message, int32, proto.Message, int32)
 
 // RPCHandler rpc处理器
 type RPCHandler struct {
