@@ -47,6 +47,8 @@ func (m *Manager) GetMessageID() []int32 {
 }
 
 // NewManager 创建管理器
+// centerAddress 中心服务器地址
+// rpcAddress 将要建立的rpc服务的地址，给gateway调用的
 func NewManager(s Service, centerAddress string, rpcAddress string) *Manager {
 	connection, err := net.Dial("tcp", centerAddress)
 	base.PanicError(err, "dial center server")
